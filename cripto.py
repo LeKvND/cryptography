@@ -3,42 +3,66 @@ from tkinter import scrolledtext
 import time
 from cryptography.fernet import Fernet
 from tkinter import filedialog
-
+import os.path
 
 #Funciones
 def close_window(): 
     window.destroy()
 
-def cryptfunc(f):
-
+def cryptfunc():
+    global f
+    
     key = Fernet.generate_key()
-    f = Fernet(key)
     llave = open("llave", "w")
-    llave.write(key)
+    llave.write(key.decode("utf-8"))
+    llave.close()
 
-    memoria = open("memoria","w")
+
+    f = Fernet(key)
 
     token = f.encrypt(variable.encode("utf-8"))
-    global tokenglobal
-    tokenglobal = token
+
     
     txt.delete('1.0', END)
     txt.insert(INSERT,token)
     
     global file_path
-    print(file_path)   
     nombreencript=file_path.rsplit('\\', 1)[-1].rsplit('.',1)[0]+"_C.txt"
     
-    #Escribes el hash en el fichero
+    memoria = open("memoria.txt", "w")    
     memoria.write(nombreencript)
+    memoria.close()
+
     cryptfile = open(nombreencript, "w")
     cryptfile.write(token.decode("utf-8"))
     cryptfile.close()
 
 
-def decryptfunc(f):
+def decryptfunc():
+
+    llavefernet = open("llave", "r")
+    key = llavefernet.read().encode("utf-8")
+    llavefernet.close()
+
+    memoria = open("memoria.txt", "r")
+    archivoaleer = memoria.read()
+    memoria.close()
+
+
+    textoencrypt = open(archivoaleer, "r")
+    textoadecrypt = textoencrypt.read()
+    textoencrypt.close()
+
+    global f
+    f = Fernet(key)
     txt.delete('1.0', END)
-    txt.insert(INSERT,f.decrypt(tokenglobal))   
+    txt.insert(INSERT,f.decrypt(textoadecrypt.encode("utf-8")))
+
+    nombredecrypt=archivoaleer.rsplit('.',1)[0].rsplit('_',1)[0]+"_D.txt"
+    decryptfile = open(nombredecrypt, "w")
+    decryptfile.write(f.decrypt(textoadecrypt.encode("utf-8")).decode("utf-8"))
+    decryptfile.close()
+   
 
 def filefunc():
     global file_path
@@ -71,11 +95,16 @@ window.overrideredirect(1)
 ##Generar llave
 
 
-
-
+llaveinicio = Fernet.generate_key()
+f = Fernet(llaveinicio)
 tokenglobal = 0
 variable = ""
 file_path = ""
+
+
+
+
+
 
 
 #GUI
@@ -84,8 +113,8 @@ close_window= Button(window, text = "X",font=("Helvetica", 16), bg='#2B2D2F',for
 lbl         = Label (window, text="Welcome to my crypto app", font=("Helvetica", 16),bg='#2B2D2F',foreground="white")
 lbl2        = Label (window, text="Aguilar Pacheco Kevin David", font=("Helvetica", 6),bg='#2B2D2F',foreground="white")
 lbl3        = Label (window, text="Practica 0", font=("Helvetica", 6),bg='#2B2D2F',foreground="white")
-crypt       = Button(window, text="Crypt", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID, foreground="#B5B1BA", command=lambda: cryptfunc(f))
-decrypt     = Button(window, text="Decrypt", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID,foreground="#B5B1BA",command=lambda:decryptfunc(f))
+crypt       = Button(window, text="Crypt", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID, foreground="#B5B1BA", command=lambda: cryptfunc())
+decrypt     = Button(window, text="Decrypt", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID,foreground="#B5B1BA",command=lambda:decryptfunc())
 filechooser = Button(window, text="Choose File", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID,foreground="#B5B1BA",command=lambda:filefunc())
 
 #Places
@@ -98,7 +127,5 @@ decrypt.place(x=580, y=70, anchor="w")
 filechooser.place(x=10, y=70, anchor="w")
 close_window.place(x=670, y=2)
 
-
-txt.insert(INSERT,variable)
 
 window.mainloop()
