@@ -1,4 +1,5 @@
 from Crypto.Cipher import DES
+from tkinter import ttk
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import filedialog
@@ -33,6 +34,7 @@ def ECB_cifrar():
     global iv
     global des
     ##ECB
+    print(key)
     image = open(filename,"rb")
     nombreencript=filename.rsplit('.',1)[0]+"_ECB.bmp"
     new_image = open(nombreencript,"wb")
@@ -41,7 +43,8 @@ def ECB_cifrar():
     new_image.write(des.encrypt(bytes_to_encrypt))
     img = ImageTk.PhotoImage(Image.open(nombreencript)) 
     panel1.configure(image = img)
-    panel1.image = img 
+    panel1.image = img
+    print(key)
 
 
 def ECB_decifrar():
@@ -49,6 +52,7 @@ def ECB_decifrar():
     global key 
     global iv
     global des
+    print(key)
     image = open(filename,"rb")
     nombredecript=filename.rsplit('.',1)[0]+"_DES.bmp"
     new_image = open(nombredecript,"wb")
@@ -58,6 +62,7 @@ def ECB_decifrar():
     img = ImageTk.PhotoImage(Image.open(nombredecript)) 
     panel1.configure(image = img)
     panel1.image = img 
+    print(key)
 
 
 def CBC_cifrar():
@@ -164,8 +169,17 @@ def OFB_decifrar():
 
 def cargar_llave(llave):
     global key
-    key = llave.encode('utf-8')
-
+    global des
+    global des1
+    global des2
+    global des3
+    global iv
+    key = llave.get().encode('utf-8')
+    print(key)
+    des  = DES.new(key, DES.MODE_ECB)
+    des1 = DES.new(key, DES.MODE_CBC, iv)
+    des2 = DES.new(key, DES.MODE_CFB, iv)
+    des3 = DES.new(key, DES.MODE_OFB, iv) 
 
 
 #interfaz
@@ -173,7 +187,6 @@ window = Tk()
 window.title("Practica 3")
 window.geometry("1150x630+100+300")
 window.configure(bg='#2B2D2F')
-window.overrideredirect(1)
 
 canvas2 = Canvas(window, width = 500, height = 500)    
 close_window= Button(window, text = "X",font=("Helvetica", 16), bg='#2B2D2F',foreground="#47474A",highlightthickness=0,relief=FLAT,command = close_window)
@@ -181,7 +194,7 @@ lbl         = Label (window, text="CIFRADOR DES", font=("Helvetica", 16),bg='#2B
 lbl2        = Label (window, text="Equipo 2", font=("Helvetica", 9),bg='#2B2D2F',foreground="white")
 lbl3        = Label (window, text="Practica DES", font=("Helvetica", 9),bg='#2B2D2F',foreground="white")
 lbl4        = Label (window, text="Inserta tu key:", font=("Helvetica", 15),bg='#2B2D2F',foreground="white")
-llave       = Entry(window)
+llave       = ttk.Entry(window)
 cargarllave    = Button(window, text="Cargar LLave", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID, foreground="#B5B1BA",command=lambda:cargar_llave(llave))
 
 cryptECB    = Button(window, text="CryptECB", font=("Helvetica", 16),bg='#2B2D2F',relief=SOLID, foreground="#B5B1BA",command=lambda:ECB_cifrar())
@@ -197,8 +210,9 @@ filechooser = Button(window, text="Choose File", font=("Helvetica", 16),bg='#2B2
 
 
 #Places
-lbl4.place(x=480, y=70, anchor="center")
+lbl4.place(x=470, y=70, anchor="center")
 llave.place(x=600, y=70, anchor="center")
+cargarllave.place(x=740, y=70, anchor="center")
 lbl.place(x=580, y=20, anchor="center")
 lbl2.place(x=40, y=620, anchor="center")
 lbl3.place(x=1100, y=620, anchor="center")
